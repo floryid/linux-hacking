@@ -6,10 +6,10 @@
     <title>Linux Command Reference</title>
     <style>
         :root {
-            --primary: #0f0;
-            --secondary: #0a0;
+            --primary: #0bf526;
+            --secondary: #fd0707;
             --background: #000;
-            --text: #0f0;
+            --text: #09fd3d;
             --glitch-offset: 3px;
         }
 
@@ -25,6 +25,25 @@
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('anonymous.svg') center/contain no-repeat;
+            opacity: 0;
+            z-index: -1;
+            animation: anonymousEffect 10s ease-in-out infinite;
+        }
+
+        @keyframes anonymousEffect {
+            0%, 100% { opacity: 0; transform: scale(0.95); }
+            50% { opacity: 0.15; transform: scale(1); }
         }
 
         .container {
@@ -38,14 +57,19 @@
             padding: 40px 0;
             position: relative;
         }
-
+        h3{
+            color: red;
+        }
+        .glitch-title {
+            color: red;
+        }
         .glitch-title {
             font-size: 3em;
             font-weight: bold;
             text-transform: uppercase;
             position: relative;
             text-shadow: 0 0 10px var(--primary);
-            animation: glitch 3s infinite;
+            animation: glitch 3s infinite, indonesia-colors 6s infinite;
         }
 
         .glitch-title::before,
@@ -766,3 +790,7 @@
     </div>
 </body>
 </html>
+@keyframes indonesia-colors {
+    0%, 100% { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+    50% { color: #ffffff; text-shadow: 0 0 10px #ffffff; }
+}
