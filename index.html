@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Command Reference</title>
+    <style>
+        :root {
+            --primary: #0f0;
+            --secondary: #0a0;
+            --background: #000;
+            --text: #0f0;
+            --glitch-offset: 3px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            position: relative;
+        }
+
+        .glitch-title {
+            font-size: 3em;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+            text-shadow: 0 0 10px var(--primary);
+            animation: glitch 3s infinite;
+        }
+
+        .glitch-title::before,
+        .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch-title::before {
+            color: var(--primary);
+            animation: glitch-top 3s infinite;
+        }
+
+        .glitch-title::after {
+            color: var(--secondary);
+            animation: glitch-bottom 3s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: none; opacity: 1; }
+            7% { transform: skew(-0.5deg, -0.9deg); opacity: 0.75; }
+            10% { transform: none; opacity: 1; }
+            27% { transform: none; opacity: 1; }
+            30% { transform: skew(0.8deg, -0.1deg); opacity: 0.75; }
+            35% { transform: none; opacity: 1; }
+        }
+
+        @keyframes glitch-top {
+            0% { transform: translate(0); }
+            7% { transform: translate(-2px, 2px); }
+            10% { transform: translate(0); }
+            27% { transform: translate(0); }
+            30% { transform: translate(-2px, 2px); }
+            35% { transform: translate(0); }
+        }
+
+        @keyframes glitch-bottom {
+            0% { transform: translate(0); }
+            7% { transform: translate(2px, -2px); }
+            10% { transform: translate(0); }
+            27% { transform: translate(0); }
+            30% { transform: translate(2px, -2px); }
+            35% { transform: translate(0); }
+        }
+
+        .terminal {
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .terminal::before {
+            content: '$ ';
+            color: var(--primary);
+        }
+
+        .command-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .command-card {
+            background: rgba(0, 20, 0, 0.5);
+            border: 1px solid var(--primary);
+            padding: 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .command-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .command-name {
+            color: var(--primary);
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .command-name::after {
+            content: '>';
+            transition: transform 0.3s ease;
+        }
+
+        .command-card.active .command-name::after {
+            transform: rotate(90deg);
+        }
+
+        .command-description {
+            font-size: 0.9em;
+            opacity: 0.8;
+            max-height: 0;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .command-card.active .command-description {
+            max-height: 200px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 255, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .glitch-title {
+                font-size: 2em;
+            }
+
+            .command-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            border-right: 2px solid var(--primary);
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--primary) }
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+            border-top: 1px solid var(--primary);
+            position: relative;
+            margin-top: 3rem;
+        }
+
+        .footer-content::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .footer-section h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2em;
+            text-shadow: 0 0 5px var(--primary);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-left: 1.2em;
+        }
+
+        .footer-section a::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary);
+            text-shadow: 0 0 5px var(--primary);
+            padding-left: 1.5em;
+        }
+
+        .footer-section a:hover::before {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .social-links a {
+            padding: 0.5em 1em;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: var(--background);
+            box-shadow: 0 0 10px var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(0, 255, 0, 0.2);
+            font-size: 0.9em;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .copyright:hover {
+            opacity: 1;
+        }
+
+        @keyframes glow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 1.5rem;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+
+            .footer-section a {
+                padding-left: 0;
+            }
+
+            .footer-section a::before {
+                display: none;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const commandCards = document.querySelectorAll('.command-card');
+            
+            commandCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="glitch-title" data-text="Linux Command Reference">Linux Command Reference</h1>
+            <div class="terminal typing-effect">
+                Welcome to the Linux Command Reference System
+            </div>
+        </header>
+
+        <main class="command-list">
+            <div class="command-card">
+                <h3 class="command-name">ls</h3>
+                <p class="command-description">Menampilkan daftar file dan direktori dalam direktori saat ini<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ ls                  # Menampilkan semua file dan folder<br>
+                $ ls -l               # Menampilkan dalam format detail<br>
+                $ ls -a               # Menampilkan file tersembunyi<br>
+                $ ls -lh              # Menampilkan ukuran file dalam format yang mudah dibaca<br>
+                $ ls /path/to/dir     # Menampilkan isi direktori tertentu</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">cd</h3>
+                <p class="command-description">Berpindah antar direktori<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ cd /home/user       # Pindah ke direktori tertentu<br>
+                $ cd ..               # Pindah ke direktori parent<br>
+                $ cd ~                # Pindah ke home directory<br>
+                $ cd -                # Kembali ke direktori sebelumnya<br>
+                $ cd /                # Pindah ke root directory</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">pwd</h3>
+                <p class="command-description">Menampilkan lokasi direktori saat ini<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ pwd                 # Menampilkan path lengkap direktori saat ini<br>
+                $ pwd -P              # Menampilkan path fisik (menyelesaikan symlinks)<br>
+                $ pwd -L              # Menampilkan path logis (mengikuti symlinks)</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">mkdir</h3>
+                <p class="command-description">Membuat direktori baru<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ mkdir folder1         # Membuat satu direktori<br>
+                $ mkdir -p dir1/dir2    # Membuat direktori beserta parent directory<br>
+                $ mkdir folder{1,2,3}   # Membuat multiple direktori<br>
+                $ mkdir -m 755 folder   # Membuat direktori dengan permission tertentu</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">rm</h3>
+                <p class="command-description">Menghapus file atau direktori<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ rm file.txt          # Menghapus file<br>
+                $ rm -r folder         # Menghapus direktori dan isinya<br>
+                $ rm -f file.txt       # Hapus tanpa konfirmasi<br>
+                $ rm -rf folder        # Hapus direktori secara paksa<br>
+                $ rm *.txt             # Hapus semua file .txt</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">cp</h3>
+                <p class="command-description">Menyalin file atau direktori<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ cp file1.txt file2.txt      # Menyalin file<br>
+                $ cp -r folder1 folder2       # Menyalin direktori<br>
+                $ cp file.txt /path/to/dir/   # Salin ke direktori lain<br>
+                $ cp -p file1 file2          # Salin dengan permission<br>
+                $ cp *.txt /backup/          # Salin semua file .txt</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">mv</h3>
+                <p class="command-description">Memindahkan atau mengganti nama file/direktori<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ mv file1.txt file2.txt      # Mengganti nama file<br>
+                $ mv file.txt /path/to/dir/   # Memindahkan file ke direktori lain<br>
+                $ mv -i file1 file2          # Konfirmasi sebelum menimpa file<br>
+                $ mv folder1 folder2         # Memindahkan/rename direktori<br>
+                $ mv *.txt /backup/          # Memindahkan semua file .txt</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">cat</h3>
+                <p class="command-description">Menampilkan isi file<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ cat file.txt               # Menampilkan isi file<br>
+                $ cat -n file.txt            # Menampilkan dengan nomor baris<br>
+                $ cat file1.txt file2.txt    # Menggabungkan dan menampilkan isi beberapa file<br>
+                $ cat > file.txt             # Membuat file baru dan menulis ke dalamnya<br>
+                $ cat >> file.txt            # Menambahkan teks ke akhir file</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">grep</h3>
+                <p class="command-description">Mencari teks dalam file<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ grep "kata" file.txt        # Mencari kata dalam file<br>
+                $ grep -i "kata" file.txt     # Pencarian tidak case-sensitive<br>
+                $ grep -r "kata" /dir/        # Mencari di semua file dalam direktori<br>
+                $ grep -v "kata" file.txt     # Menampilkan baris yang tidak mengandung kata<br>
+                $ grep -n "kata" file.txt     # Menampilkan nomor baris hasil pencarian</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">docker</h3>
+                <p class="command-description">Platform kontainerisasi untuk menjalankan dan mengelola aplikasi dalam container yang terisolasi<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ docker run nginx           # Menjalankan container nginx<br>
+                $ docker ps                  # Melihat container yang sedang berjalan<br>
+                $ docker images              # Melihat daftar images<br>
+                $ docker build -t app .      # Build image dari Dockerfile<br>
+                $ docker stop container_id   # Menghentikan container</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">kubectl</h3>
+                <p class="command-description">Tool command-line untuk mengontrol cluster Kubernetes dan mengelola aplikasi container<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ kubectl get pods           # Melihat semua pods<br>
+                $ kubectl get nodes          # Melihat semua nodes<br>
+                $ kubectl apply -f app.yaml  # Menerapkan konfigurasi<br>
+                $ kubectl logs pod-name      # Melihat log pod<br>
+                $ kubectl describe pod name  # Detail informasi pod</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">htop</h3>
+                <p class="command-description">Monitor sistem interaktif yang menampilkan penggunaan CPU, memori, dan proses secara real-time<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ htop                       # Membuka htop<br>
+                $ htop -u username           # Filter proses by user<br>
+                $ htop -p PID1,PID2          # Monitor PID tertentu<br>
+                $ htop -s PERCENT_CPU        # Sort by CPU usage<br>
+                $ htop -t                    # Tampilkan process tree</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">netstat -tulpn</h3>
+                <p class="command-description">Menampilkan koneksi jaringan aktif, port yang terbuka, dan proses yang menggunakannya<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ netstat -tulpn           # Tampilkan semua koneksi TCP/UDP<br>
+                $ netstat -an              # Tampilkan semua koneksi dalam format numerik<br>
+                $ netstat -l               # Tampilkan hanya port yang listening<br>
+                $ netstat -p               # Tampilkan PID dan nama program<br>
+                $ netstat -r               # Tampilkan tabel routing</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">nmap</h3>
+                <p class="command-description">Scanner jaringan untuk menemukan host dan layanan di jaringan komputer<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ nmap 192.168.1.0/24      # Scan subnet<br>
+                $ nmap -sS target          # Stealth scan<br>
+                $ nmap -sV target          # Deteksi versi layanan<br>
+                $ nmap -p 80,443 target    # Scan port tertentu<br>
+                $ nmap -A target           # Scan agresif</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">systemctl</h3>
+                <p class="command-description">Mengelola sistem dan layanan pada sistem Linux modern yang menggunakan systemd<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ systemctl start service   # Memulai layanan<br>
+                $ systemctl stop service    # Menghentikan layanan<br>
+                $ systemctl status service  # Cek status layanan<br>
+                $ systemctl enable service  # Aktifkan autostart<br>
+                $ systemctl restart service # Restart layanan</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">apt</h3>
+                <p class="command-description">Package manager untuk distribusi Linux berbasis Debian<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ apt update              # Update repository<br>
+                $ apt install package     # Install package<br>
+                $ apt remove package      # Hapus package<br>
+                $ apt search keyword      # Cari package<br>
+                $ apt list --upgradable   # Cek update tersedia</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">yum</h3>
+                <p class="command-description">Package manager untuk distribusi Linux berbasis RedHat<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ yum update              # Update sistem<br>
+                $ yum install package     # Install package<br>
+                $ yum remove package      # Hapus package<br>
+                $ yum search keyword      # Cari package<br>
+                $ yum list updates        # Cek update tersedia</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">tcpdump</h3>
+                <p class="command-description">Analisis paket jaringan command-line<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ tcpdump -i eth0         # Capture interface eth0<br>
+                $ tcpdump port 80         # Capture traffic port 80<br>
+                $ tcpdump host ip         # Capture traffic dari/ke host<br>
+                $ tcpdump -w file.pcap    # Simpan capture ke file<br>
+                $ tcpdump -r file.pcap    # Baca file capture</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">wireshark</h3>
+                <p class="command-description">Analisis paket jaringan dengan GUI<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ wireshark               # Buka GUI Wireshark<br>
+                $ wireshark -i eth0       # Capture interface eth0<br>
+                $ wireshark -k -w file    # Capture langsung ke file<br>
+                $ wireshark -r file.pcap   # Buka file capture<br>
+                $ tshark                   # Versi CLI Wireshark</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">sar</h3>
+                <p class="command-description">System Activity Reporter untuk monitoring performa<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ sar                     # Tampilkan statistik CPU<br>
+                $ sar -r                  # Monitor penggunaan memori<br>
+                $ sar -b                  # Monitor I/O dan transfer rate<br>
+                $ sar -n DEV              # Monitor statistik network<br>
+                $ sar -f /var/log/sa/sa1  # Baca dari file log</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">iostat</h3>
+                <p class="command-description">Monitoring statistik CPU dan I/O untuk devices dan partisi<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ iostat                  # Tampilkan statistik dasar<br>
+                $ iostat -x               # Statistik extended<br>
+                $ iostat -p ALL           # Monitor semua partisi<br>
+                $ iostat 2 10             # Update tiap 2 detik, 10 kali<br>
+                $ iostat -m               # Tampilkan dalam MB/detik</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">prometheus</h3>
+                <p class="command-description">Sistem monitoring dan alerting modern<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ prometheus --config.file=config.yml # Start server<br>
+                $ promtool check config              # Validasi config<br>
+                $ prometheus_multiproc_dir           # Setup metrics<br>
+                $ prometheus_client                  # Expose metrics<br>
+                $ alertmanager                       # Manage alerts</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">grafana</h3>
+                <p class="command-description">Platform visualisasi dan analitik untuk monitoring<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ grafana-server                  # Start Grafana<br>
+                $ grafana-cli plugins install     # Install plugin<br>
+                $ grafana-cli admin reset-admin   # Reset password<br>
+                $ grafana dashboard import        # Import dashboard<br>
+                $ grafana datasource add         # Tambah source</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">terraform</h3>
+                <p class="command-description">Infrastructure as Code untuk provisioning cloud resources<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ terraform init          # Inisialisasi project<br>
+                $ terraform plan          # Preview perubahan<br>
+                $ terraform apply         # Terapkan perubahan<br>
+                $ terraform destroy       # Hapus infrastruktur<br>
+                $ terraform workspace     # Kelola workspace</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">vault</h3>
+                <p class="command-description">Manajemen rahasia dan enkripsi untuk credentials<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ vault server            # Start Vault server<br>
+                $ vault secrets list      # List secret engines<br>
+                $ vault kv put secret     # Simpan secret<br>
+                $ vault token create      # Buat token akses<br>
+                $ vault policy write      # Buat policy</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">helm</h3>
+                <p class="command-description">Package manager untuk Kubernetes<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ helm install release    # Install chart<br>
+                $ helm upgrade release    # Upgrade release<br>
+                $ helm rollback release   # Rollback release<br>
+                $ helm repo add          # Tambah repository<br>
+                $ helm template           # Generate manifests</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">istioctl</h3>
+                <p class="command-description">Service mesh untuk mikroservis modern<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ istioctl install        # Install Istio<br>
+                $ istioctl analyze        # Analisis config<br>
+                $ istioctl proxy-status   # Status proxy<br>
+                $ istioctl dashboard      # Buka dashboard<br>
+                $ istioctl verify-install # Verifikasi install</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">etcdctl</h3>
+                <p class="command-description">CLI untuk manajemen distributed key-value store<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ etcdctl put key value   # Set key-value<br>
+                $ etcdctl get key         # Ambil value<br>
+                $ etcdctl watch prefix    # Watch perubahan<br>
+                $ etcdctl snapshot save   # Backup data<br>
+                $ etcdctl member list     # List member</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">trivy</h3>
+                <p class="command-description">Scanner keamanan untuk container dan repository<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ trivy image nginx       # Scan image<br>
+                $ trivy fs directory      # Scan filesystem<br>
+                $ trivy repo url          # Scan repository<br>
+                $ trivy k8s cluster       # Scan kubernetes<br>
+                $ trivy config file       # Scan config file</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">journalctl</h3>
+                <p class="command-description">Melihat dan menganalisis log sistem pada Linux yang menggunakan systemd<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ journalctl               # Lihat semua log<br>
+                $ journalctl -f            # Monitor log secara real-time<br>
+                $ journalctl -u service    # Log dari service tertentu<br>
+                $ journalctl --since today # Log hari ini<br>
+                $ journalctl -p err        # Log error saja</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">ansible</h3>
+                <p class="command-description">Tool otomatisasi IT untuk konfigurasi sistem, deployment aplikasi, dan orchestrasi<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ ansible all -m ping                # Cek konektivitas ke semua host<br>
+                $ ansible-playbook playbook.yml      # Menjalankan playbook<br>
+                $ ansible host -m setup              # Mengumpulkan informasi sistem<br>
+                $ ansible-galaxy install role        # Install role dari Ansible Galaxy<br>
+                $ ansible host -m command -a 'uptime' # Menjalankan perintah di remote host</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">locate</h3>
+                <p class="command-description">Mencari file dengan cepat menggunakan database yang telah diindeks sebelumnya<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ locate filename           # Mencari file dengan nama tertentu<br>
+                $ locate -i filename        # Pencarian tidak case-sensitive<br>
+                $ locate -n 5 filename      # Tampilkan 5 hasil pertama<br>
+                $ locate -e filename        # Hanya tampilkan file yang ada<br>
+                $ updatedb                  # Update database locate</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">find</h3>
+                <p class="command-description">Mencari file secara real-time dengan kriteria pencarian yang lebih detail seperti nama, ukuran, atau waktu modifikasi<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ find . -name "*.txt"      # Mencari file .txt di direktori saat ini<br>
+                $ find / -type d -name dir  # Mencari direktori dengan nama tertentu<br>
+                $ find . -size +100M        # Mencari file lebih dari 100MB<br>
+                $ find . -mtime -7          # File dimodifikasi dalam 7 hari terakhir<br>
+                $ find . -perm 644          # Mencari file dengan permission tertentu</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">whereis</h3>
+                <p class="command-description">Mencari lokasi binary, source code, dan manual pages dari suatu perintah<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ whereis python           # Mencari lokasi python<br>
+                $ whereis -b python        # Hanya mencari binary<br>
+                $ whereis -m python        # Hanya mencari manual pages<br>
+                $ whereis -s python        # Hanya mencari source code<br>
+                $ whereis -B /usr/bin -f ls # Mencari di direktori tertentu</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-name">which</h3>
+                <p class="command-description">Menampilkan path lengkap dari perintah yang akan dieksekusi berdasarkan variabel PATH<br><br>
+                <strong>Contoh Penggunaan:</strong><br>
+                $ which python             # Mencari lokasi executable python<br>
+                $ which -a python          # Tampilkan semua lokasi python<br>
+                $ which ls                 # Mencari lokasi perintah ls<br>
+                $ which gcc g++            # Mencari multiple program<br>
+                $ which bash               # Mencari lokasi shell bash</p>
+            </div>
+        </main>
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Navigasi</h3>
+                    <ul>
+                        <li><a href="#">Beranda</a></li>
+                        <li><a href="#">Tutorial Linux</a></li>
+                        <li><a href="#">Referensi Perintah</a></li>
+                        <li><a href="#">Tips & Trik</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Sumber Daya</h3>
+                    <ul>
+                        <li><a href="#">Dokumentasi</a></li>
+                        <li><a href="#">Forum Komunitas</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Hubungi Kami</h3>
+                    <ul>
+                        <li><a href="#">Tentang Kami</a></li>
+                        <li><a href="#">Kontak</a></li>
+                        <li><a href="#">Kebijakan Privasi</a></li>
+                        <li><a href="#">Syarat & Ketentuan</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Ikuti Kami</h3>
+                    <div class="social-links">
+                        <a href="#" title="GitHub">GitHub</a>
+                        <a href="#" title="Twitter">Twitter</a>
+                        <a href="#" title="Discord">Discord</a>
+                        <a href="#" title="Telegram">Telegram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 Linux Command Reference. Dibuat Oleh 💚 Nofri.F.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
